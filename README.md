@@ -1,6 +1,6 @@
-# headspace_design — a Headspace-coloured build of the Wise/Neptune design skill
+# Rooster Design System
 
-This is a new skill based on your **GWDS** `wise_design` skill. Everything —
+The **Rooster Design System** (`rooster-design-system`) is a new skill based on your **GWDS** `wise_design` skill. Everything —
 typography, spacing, radii, components, patterns, the Inter fonts, and all 1,293
 reference mockups — is kept identical. **The only change is colour:** the palette
 and semantic tokens are swapped to the **Headspace** colours from
