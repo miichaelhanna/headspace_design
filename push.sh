@@ -1,67 +1,55 @@
 #!/usr/bin/env bash
 #
-# push.sh — Assemble the full "headspace_design" skill and push it to a NEW
-#           GitHub repo, from YOUR machine (where you're logged in to GitHub).
+# push.sh — Fill the headspace_design repo with the bulk files from GWDS.
 #
-# Why you have to run this (not the assistant): creating a repo and pushing
-# both require your GitHub credentials, and the assistant's sandbox has no
-# network access to GitHub.
+# The repo already has the recoloured SKILL.md, references/foundations.md,
+# assets_guide.md, README.md and the scripts. This script adds the parts that
+# couldn't be uploaded through the browser:
+#   - references/components.md   (unchanged, ~150KB)
+#   - references/patterns.md     (unchanged, ~100KB)
+#   - fonts/                     (5 Inter TTFs)
+#   - assets/                    (1,293 PNGs, ~528MB)
+# ...then commits and pushes them.
 #
-# Prerequisites:
-#   - git
-#   - GitHub CLI (`gh`)  ->  https://cli.github.com   (run `gh auth login` once)
+# HOW TO RUN (on your Mac):
+#   1) git clone https://github.com/miichaelhanna/headspace_design.git
+#   2) cd headspace_design
+#   3) bash push.sh
 #
-# Usage:
-#   ./push.sh                       # repo name defaults to "headspace_design"
-#   ./push.sh my-repo-name          # custom repo name
-#   ./push.sh my-repo-name /path/to/GWDS   # use a local GWDS checkout
+# Prerequisites: git, and push access to the repo (gh auth login, or a
+# credential helper / SSH key already set up).
 #
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_NAME="${1:-headspace_design}"
-GWDS_SRC="${2:-}"
-VISIBILITY="private"          # change to "public" if you want a public repo
-WORK="$HERE/.push_build"
+cd "$HERE"
 
-command -v gh  >/dev/null || { echo "ERROR: GitHub CLI (gh) not found. Install from https://cli.github.com"; exit 1; }
-command -v git >/dev/null || { echo "ERROR: git not found."; exit 1; }
-
-# 1. Get the original Wise skill (fonts + all 1,293 assets + unchanged refs).
-if [[ -z "$GWDS_SRC" ]]; then
-  echo "Cloning GWDS (~528MB of assets, may take a while)..."
-  rm -rf "$WORK/GWDS"
-  mkdir -p "$WORK"
-  git clone --depth 1 https://github.com/miichaelhanna/GWDS.git "$WORK/GWDS"
-  SRC="$WORK/GWDS/skills/wise_design"
-else
-  [[ -d "$GWDS_SRC/skills/wise_design" ]] && GWDS_SRC="$GWDS_SRC/skills/wise_design"
-  SRC="$GWDS_SRC"
+if [[ ! -f SKILL.md || ! -d references ]]; then
+  echo "ERROR: run this from the root of your headspace_design clone (where SKILL.md lives)." >&2
+  exit 1
 fi
-[[ -f "$SRC/SKILL.md" ]] || { echo "ERROR: wise_design skill not found at $SRC"; exit 1; }
 
-# 2. Assemble the repo contents: skills/headspace_design/<full skill>
-REPO_DIR="$WORK/$REPO_NAME"
-rm -rf "$REPO_DIR"
-mkdir -p "$REPO_DIR/skills"
-cp -R "$SRC" "$REPO_DIR/skills/headspace_design"
+TMP="$(mktemp -d)"
+echo "Cloning GWDS (~528MB of assets — this can take a few minutes)..."
+git clone --depth 1 https://github.com/miichaelhanna/GWDS.git "$TMP/GWDS"
+SRC="$TMP/GWDS/skills/wise_design"
+[[ -f "$SRC/SKILL.md" ]] || { echo "ERROR: wise_design skill not found in GWDS clone."; exit 1; }
 
-# Drop in the two recoloured files (they live next to this script).
-cp "$HERE/SKILL.md"                  "$REPO_DIR/skills/headspace_design/SKILL.md"
-cp "$HERE/references/foundations.md" "$REPO_DIR/skills/headspace_design/references/foundations.md"
-cp "$HERE/README.md"                 "$REPO_DIR/README.md"
+echo "Copying bulk files (fonts, assets, components.md, patterns.md)..."
+mkdir -p references fonts assets
+cp "$SRC/references/components.md" references/components.md
+cp "$SRC/references/patterns.md"   references/patterns.md
+cp -R "$SRC/fonts/."  fonts/
+cp -R "$SRC/assets/." assets/
 
-# 3. Init git and push to a new repo.
-cd "$REPO_DIR"
-git init -q
+# NOTE: SKILL.md, references/foundations.md and assets_guide.md are intentionally
+# NOT copied — the repo already holds the recoloured / correct versions.
+
+echo "Committing and pushing..."
 git add -A
-git -c user.email="$(git config --global user.email || echo you@example.com)" \
-    -c user.name="$(git config --global user.name || echo you)" \
-    commit -qm "headspace_design: Headspace-coloured Wise/Neptune design skill"
+git commit -m "Add fonts, 1,293 assets, and components.md/patterns.md from GWDS"
+git push origin main
 
-echo "Creating GitHub repo '$REPO_NAME' ($VISIBILITY) and pushing..."
-gh repo create "$REPO_NAME" --"$VISIBILITY" --source=. --remote=origin --push
-
+rm -rf "$TMP"
 echo
-echo "Done. Repo pushed:"
-gh repo view "$REPO_NAME" --json url -q .url
+echo "Done. Everything is now in https://github.com/miichaelhanna/headspace_design"
