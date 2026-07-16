@@ -1,11 +1,11 @@
 ---
-name: headspace_design
-description: "Guidelines and reference documentation for the Headspace-coloured Wise Design System (Neptune Design System structure), including its typography, Headspace colour palette, core grid spacing, border radii, and 50+ UI components and patterns."
+name: rooster-design-system
+description: "Guidelines and reference documentation for the Rooster Design System — the Wise/Neptune Design System structure recoloured with the Headspace brand palette. Includes typography, the Headspace colour palette, core grid spacing, border radii, and 50+ UI components and patterns."
 ---
 
-# Headspace Design System (Neptune CSS structure + Headspace colour) Skill
+# Rooster Design System
 
-You are equipped with the knowledge of the **Wise / Neptune Design System** structure, recoloured with the **Headspace Brand Colour Palette**. Typography, spacing, radii, components, and patterns follow Wise/Neptune; **colour is 100% Headspace** (source: `live.standards.site/headspace/color`, updated September 2024).
+You are equipped with the knowledge of the **Rooster Design System** — the **Wise / Neptune Design System** structure, recoloured with the **Headspace Brand Colour Palette**. Typography, spacing, radii, components, and patterns follow Wise/Neptune; **colour is 100% Headspace** (source: `live.standards.site/headspace/color`, updated September 2024).
 
 ---
 
